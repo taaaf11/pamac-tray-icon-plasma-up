@@ -27,3 +27,5 @@ add_executable(pamac-tray-plasma
 target_include_directories(pamac-tray-plasma PUBLIC ${DEPS_INCLUDE_DIRS})
 
 target_link_libraries(pamac-tray-plasma Qt5::Core Qt5::Widgets ${DEPS_LDFLAGS})
+
+install(TARGETS pamac-tray-plasma)
