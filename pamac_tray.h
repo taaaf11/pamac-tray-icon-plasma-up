@@ -13,13 +13,20 @@ class PamacTray : public QSystemTrayIcon
 public:
     PamacTray(QObject* parent = nullptr):QSystemTrayIcon(QIcon::fromTheme("pamac-tray-no-update"),parent),
         m_updatesChecker(pamac_updates_checker_new())
-   {
+    {
 
 
         setToolTip("Pamac tray");
 
         this->setContextMenu(create_menu());
-        connect(this, &QSystemTrayIcon::activated, this, &PamacTray::execute_manager);
+        connect(this, &QSystemTrayIcon::activated, this,
+                [=](){
+            if(pamac_updates_checker_get_updates_nb(m_updatesChecker)>0){
+                execute_updater();
+            } else{
+                execute_manager();
+            }
+        });
 
         g_signal_connect(m_updatesChecker, "updates_available", reinterpret_cast<GCallback>(+[](PamacUpdatesChecker* checker, int updates_nb, void* selfPtr){
                              auto self = reinterpret_cast<PamacTray*>(selfPtr);
@@ -33,7 +40,7 @@ public:
                                  self->show_or_update_notification(updates_nb);
                              }
 
-        }), this);
+                         }), this);
 
         QTimer::singleShot(30 * 1000, this, [=](){
             pamac_updates_checker_check_updates(m_updatesChecker);
