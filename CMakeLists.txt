@@ -23,6 +23,8 @@ add_executable(pamac-tray-plasma
   main.cpp
   pamac_tray.cpp
   pamac_tray.h
+  run_guard.cpp
+  run_guard.h
 )
 target_include_directories(pamac-tray-plasma PUBLIC ${DEPS_INCLUDE_DIRS})
 
