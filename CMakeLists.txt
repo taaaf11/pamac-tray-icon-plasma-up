@@ -30,4 +30,7 @@ target_include_directories(pamac-tray-plasma PUBLIC ${DEPS_INCLUDE_DIRS})
 
 target_link_libraries(pamac-tray-plasma Qt5::Core Qt5::Widgets ${DEPS_LDFLAGS})
 
+configure_file(pamac-tray-plasma.desktop.in pamac-tray-plasma.desktop)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pamac-tray-plasma.desktop DESTINATION /etc/xdg/autostart/ )
 install(TARGETS pamac-tray-plasma)
