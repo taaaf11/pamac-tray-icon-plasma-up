@@ -3,6 +3,44 @@
 #include <QAction>
 #include <QApplication>
 
+PamacTray::PamacTray(QObject *parent):QSystemTrayIcon(QIcon::fromTheme("pamac-tray-no-update"),parent),
+    m_updatesChecker(pamac_updates_checker_new())
+{
+
+
+    setToolTip("Your system is up-to-date");
+
+    this->setContextMenu(create_menu());
+    connect(this, &QSystemTrayIcon::activated, this,
+            [=](){
+        if(pamac_updates_checker_get_updates_nb(m_updatesChecker)>0){
+            execute_updater();
+        } else{
+            execute_manager();
+        }
+    });
+
+    g_signal_connect(m_updatesChecker, "updates_available", reinterpret_cast<GCallback>(+[](PamacUpdatesChecker* checker, int updates_nb, void* selfPtr){
+                         auto self = reinterpret_cast<PamacTray*>(selfPtr);
+
+                         if(updates_nb == 0){
+                             self->setIcon(QIcon::fromTheme("pamac-tray-no-update"));
+                             self->setToolTip(tr("Your system is up-to-date"));
+                             self->setVisible(!pamac_updates_checker_get_no_update_hide_icon(checker));
+                             self->close_notification();
+                         } else{
+                             self->show_or_update_notification(updates_nb);
+                         }
+
+                     }), this);
+
+    QTimer::singleShot(30 * 1000, this, [=](){
+        pamac_updates_checker_check_updates(m_updatesChecker);
+    });
+    updateCheckerTimerId = startTimer(3600*1000);
+
+}
+
 void PamacTray::execute_updater()
 {
     QProcess::startDetached("pamac-manager", {"--updates"});
@@ -57,8 +95,11 @@ void PamacTray::update_notification(QString info)
 
 void PamacTray::close_notification()
 {
-    notify_notification_close(m_notification,nullptr);
-    m_notification = nullptr;
+    if(m_notification!=nullptr){
+        notify_notification_close(m_notification,nullptr);
+        free(m_notification);
+        m_notification = nullptr;
+    }
 }
 
 QMenu* PamacTray::create_menu()
