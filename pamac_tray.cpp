@@ -3,8 +3,7 @@
 #include <QAction>
 #include <QApplication>
 
-PamacTray::PamacTray(QObject *parent):QSystemTrayIcon(QIcon::fromTheme("pamac-tray-no-update"),parent),
-    m_updatesChecker(pamac_updates_checker_new())
+PamacTray::PamacTray(QObject *parent):QSystemTrayIcon(QIcon::fromTheme("pamac-tray-no-update"),parent)
 {
 
 
@@ -13,29 +12,27 @@ PamacTray::PamacTray(QObject *parent):QSystemTrayIcon(QIcon::fromTheme("pamac-tr
     this->setContextMenu(create_menu());
     connect(this, &QSystemTrayIcon::activated, this,
             [=](){
-        if(pamac_updates_checker_get_updates_nb(m_updatesChecker)>0){
+        if(m_updatesChecker.updatesNb()>0){
             execute_updater();
         } else{
             execute_manager();
         }
     });
 
-    g_signal_connect(m_updatesChecker, "updates_available", reinterpret_cast<GCallback>(+[](PamacUpdatesChecker* checker, int updates_nb, void* selfPtr){
-                         auto self = reinterpret_cast<PamacTray*>(selfPtr);
-
+    connect(&m_updatesChecker, &LibQPamac::UpdatesChecker::updatesAvailable, [this](uint16_t updates_nb){
                          if(updates_nb == 0){
-                             self->setIcon(QIcon::fromTheme("pamac-tray-no-update"));
-                             self->setToolTip(tr("Your system is up-to-date"));
-                             self->setVisible(!pamac_updates_checker_get_no_update_hide_icon(checker));
-                             self->close_notification();
+                             setIcon(QIcon::fromTheme("pamac-tray-no-update"));
+                             setToolTip(tr("Your system is up-to-date"));
+                             setVisible(!m_updatesChecker.noUpdateHideIcon());
+                             close_notification();
                          } else{
-                             self->show_or_update_notification(updates_nb);
+                             show_or_update_notification(updates_nb);
                          }
 
-                     }), this);
+                     });
 
-    QTimer::singleShot(30 * 1000, this, [=](){
-        pamac_updates_checker_check_updates(m_updatesChecker);
+    QTimer::singleShot(30*1000, this, [=](){
+        m_updatesChecker.checkUpdates();
     });
     updateCheckerTimerId = startTimer(3600*1000);
 
@@ -113,7 +110,7 @@ QMenu* PamacTray::create_menu()
 
     action = new QAction(menu);
     action->setText(tr("Quit"));
-    connect(action, &QAction::triggered, [](){QApplication::quit();});
+    connect(action, &QAction::triggered,this , [](){QApplication::quit();});
     menu->addAction(action);
 
     return menu;
