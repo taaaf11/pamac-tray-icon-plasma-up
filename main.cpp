@@ -8,12 +8,13 @@ int main(int argc, char *argv[])
     if(!guard.tryToRun()){
         return 0;
     }
+    notify_init("Package Manager");
 
     QApplication a(argc, argv);
-    notify_init("Package Manager");
+    QApplication::setQuitOnLastWindowClosed(false);
 
     PamacTray tray;
     tray.show();
 
-    return a.exec();
+    return QApplication::exec();
 }
