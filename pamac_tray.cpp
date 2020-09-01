@@ -33,7 +33,7 @@ PamacTray::PamacTray(QObject *parent):KStatusNotifierItem(parent)
 
     });
 
-    QTimer::singleShot(1, this, [=](){
+    QTimer::singleShot(36*1000, this, [=](){
         m_updatesChecker.checkUpdates();
     });
     updateCheckerTimerId = startTimer(3600*1000);
