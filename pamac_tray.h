@@ -31,7 +31,7 @@ private:
     LibQPamac::UpdatesChecker m_updatesChecker;
     NotifyNotification* m_notification = nullptr;
     QMenu* create_menu();
-
+    QString m_info;
 
 
 };

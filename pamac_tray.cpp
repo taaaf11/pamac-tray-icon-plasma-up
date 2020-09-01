@@ -33,7 +33,7 @@ PamacTray::PamacTray(QObject *parent):KStatusNotifierItem(parent)
 
     });
 
-    QTimer::singleShot(36*1000, this, [=](){
+    QTimer::singleShot(1, this, [=](){
         m_updatesChecker.checkUpdates();
     });
     updateCheckerTimerId = startTimer(3600*1000);
@@ -56,7 +56,7 @@ void PamacTray::show_notification(QString info)
     close_notification();
 
     m_notification = notify_notification_new(tr("Package Manager").toUtf8(), info.toUtf8(), "system-software-install-symbolic");
-
+    m_info = info;
     notify_notification_set_timeout(m_notification, NOTIFY_EXPIRES_DEFAULT);
 
     notify_notification_add_action(m_notification, "default", tr("Details").toUtf8(),+[](NotifyNotification*, char*, void* selfPtr){
@@ -81,10 +81,10 @@ void PamacTray::show_or_update_notification(uint updates_nb)
 void PamacTray::update_notification(QString info)
 {
     if(m_notification!=nullptr){
-        if(notify_notification_get_closed_reason(m_notification) == -1){
+        if(notify_notification_get_closed_reason(m_notification) == -1 && m_info!=info){
             notify_notification_update(m_notification, tr("Package Manager").toUtf8(),
                                        info.toUtf8(), "system-software-install-symbolic");
-
+            m_info = info;
             notify_notification_show(m_notification,nullptr);
         }
 
