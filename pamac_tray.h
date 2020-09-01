@@ -5,9 +5,10 @@
 #include <glib.h>
 #include <QTimerEvent>
 #include <UpdatesChecker.h>
+#include <KStatusNotifierItem>
 #include <libnotify/notification.h>
 
-class PamacTray : public QSystemTrayIcon
+class PamacTray : public KStatusNotifierItem
 {
     Q_OBJECT
 public:

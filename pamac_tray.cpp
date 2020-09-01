@@ -3,14 +3,16 @@
 #include <QAction>
 #include <QApplication>
 
-PamacTray::PamacTray(QObject *parent):QSystemTrayIcon(QIcon::fromTheme("pamac-tray-no-update"),parent)
+PamacTray::PamacTray(QObject *parent):KStatusNotifierItem(parent)
 {
 
 
-    setToolTip("Your system is up-to-date");
+    setToolTipTitle(tr("Your system is up-to-date"));
+    setIconByName("pamac-tray-no-update");
+    setStandardActionsEnabled(false);
 
     this->setContextMenu(create_menu());
-    connect(this, &QSystemTrayIcon::activated, this,
+    connect(this, &KStatusNotifierItem::activateRequested, this,
             [=](){
         if(m_updatesChecker.updatesNb()>0){
             execute_updater();
@@ -20,18 +22,18 @@ PamacTray::PamacTray(QObject *parent):QSystemTrayIcon(QIcon::fromTheme("pamac-tr
     });
 
     connect(&m_updatesChecker, &LibQPamac::UpdatesChecker::updatesAvailable, [this](uint16_t updates_nb){
-                         if(updates_nb == 0){
-                             setIcon(QIcon::fromTheme("pamac-tray-no-update"));
-                             setToolTip(tr("Your system is up-to-date"));
-                             setVisible(!m_updatesChecker.noUpdateHideIcon());
-                             close_notification();
-                         } else{
-                             show_or_update_notification(updates_nb);
-                         }
+        if(updates_nb == 0){
+            setIconByName("pamac-tray-no-update");
+            setToolTipTitle(tr("Your system is up-to-date"));
+            setStatus(m_updatesChecker.noUpdateHideIcon()?ItemStatus::Passive:ItemStatus::Active);
+            close_notification();
+        } else{
+            show_or_update_notification(m_updatesChecker.updatesNb());
+        }
 
-                     });
+    });
 
-    QTimer::singleShot(30*1000, this, [=](){
+    QTimer::singleShot(1, this, [=](){
         m_updatesChecker.checkUpdates();
     });
     updateCheckerTimerId = startTimer(3600*1000);
@@ -69,9 +71,9 @@ void PamacTray::show_or_update_notification(uint updates_nb)
 {
     QString info = tr("%n available update(s)", "", updates_nb);
 
-    setIcon(QIcon::fromTheme("pamac-tray-update"));
-    setToolTip(info);
-    setVisible(true);
+    setIconByName("pamac-tray-update");
+    setToolTipTitle(info);
+    setStatus(ItemStatus::Active);
 
     update_notification(info);
 }
@@ -79,11 +81,12 @@ void PamacTray::show_or_update_notification(uint updates_nb)
 void PamacTray::update_notification(QString info)
 {
     if(m_notification!=nullptr){
-        if(notify_notification_get_closed_reason(m_notification) == -1)
+        if(notify_notification_get_closed_reason(m_notification) == -1){
             notify_notification_update(m_notification, tr("Package Manager").toUtf8(),
                                        info.toUtf8(), "system-software-install-symbolic");
 
-        notify_notification_show(m_notification,nullptr);
+            notify_notification_show(m_notification,nullptr);
+        }
 
     } else{
         show_notification(info);
@@ -110,7 +113,7 @@ QMenu* PamacTray::create_menu()
 
     action = new QAction(menu);
     action->setText(tr("Quit"));
-    connect(action, &QAction::triggered,this , [](){QApplication::quit();});
+    connect(action, &QAction::triggered,this , &QApplication::quit);
     menu->addAction(action);
 
     return menu;
