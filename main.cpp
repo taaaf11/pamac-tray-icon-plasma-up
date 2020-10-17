@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
     QApplication::setQuitOnLastWindowClosed(false);
-    QApplication::setApplicationName("pamac-tray-plasma");
+    QApplication::setApplicationName("Updates");
     PamacTray tray;
 
 
