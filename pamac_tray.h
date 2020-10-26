@@ -2,12 +2,13 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QTimer>
-#include <pamac.h>
 #include <glib.h>
 #include <QTimerEvent>
+#include <UpdatesChecker.h>
+#include <KStatusNotifierItem>
 #include <libnotify/notification.h>
 
-class PamacTray : public QSystemTrayIcon
+class PamacTray : public KStatusNotifierItem
 {
     Q_OBJECT
 public:
@@ -15,7 +16,7 @@ public:
 
     void timerEvent(QTimerEvent* e) override {
         if (e->timerId() == updateCheckerTimerId){
-            pamac_updates_checker_check_updates(m_updatesChecker);
+            m_updatesChecker.checkUpdates();
         }
     }
 private Q_SLOTS:
@@ -27,10 +28,10 @@ private Q_SLOTS:
     void close_notification();
 private:
     int updateCheckerTimerId;
-    PamacUpdatesChecker* m_updatesChecker = nullptr;
+    LibQPamac::UpdatesChecker m_updatesChecker;
     NotifyNotification* m_notification = nullptr;
     QMenu* create_menu();
-
+    QString m_info;
 
 
 };

@@ -8,10 +8,11 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt5 COMPONENTS Core Widgets)
+find_package(KF5Notifications)
 find_package(PkgConfig)
 add_definitions(-DQT_NO_KEYWORDS)
 
@@ -25,10 +26,14 @@ add_executable(pamac-tray-plasma
   pamac_tray.h
   run_guard.cpp
   run_guard.h
+#  temporary while libqpamac is tied to pamac-qt
+  UpdatesChecker.cpp
+  UpdatesChecker.h
 )
 target_include_directories(pamac-tray-plasma PUBLIC ${DEPS_INCLUDE_DIRS})
 
-target_link_libraries(pamac-tray-plasma Qt5::Core Qt5::Widgets ${DEPS_LDFLAGS})
+
+target_link_libraries(pamac-tray-plasma Qt5::Core Qt5::Widgets ${DEPS_LDFLAGS} KF5::Notifications)
 
 configure_file(pamac-tray-plasma.desktop.in pamac-tray-plasma.desktop)
 
