@@ -97,7 +97,6 @@ void PamacTray::close_notification()
 {
     if(m_notification!=nullptr){
         notify_notification_close(m_notification,nullptr);
-        free(m_notification);
         m_notification = nullptr;
     }
 }
