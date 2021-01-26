@@ -29,6 +29,7 @@ add_executable(pamac-tray-plasma
 #  temporary while libqpamac is tied to pamac-qt
   UpdatesChecker.cpp
   UpdatesChecker.h
+  resources.qrc
 )
 target_include_directories(pamac-tray-plasma PUBLIC ${DEPS_INCLUDE_DIRS})
 

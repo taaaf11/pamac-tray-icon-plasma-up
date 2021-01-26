@@ -69,7 +69,7 @@ void PamacTray::show_notification(QString info)
 
 void PamacTray::show_or_update_notification(uint updates_nb)
 {
-    QString info = tr("%n available update(s)", "", updates_nb);
+    QString info = tr("%n available update", "", updates_nb);
 
     setIconByName("pamac-tray-update");
     setToolTipTitle(info);
