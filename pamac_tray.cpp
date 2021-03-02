@@ -47,8 +47,7 @@ void PamacTray::execute_updater()
 
 void PamacTray::execute_manager()
 {
-    QProcess::startDetached("pamac-manager", {{}});
-
+    QProcess::startDetached("pamac-manager", {});
 }
 
 void PamacTray::show_notification(QString info)
